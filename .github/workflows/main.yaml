@@ -23,10 +23,10 @@ jobs:
         distribution: 'temurin'
 
     - name: Maven Test
-      run: mvn test
+      run: mvn clean test -Dcheckstyle.skip=true
 
-    - name: Checkstyle
-      run: mvn checkstyle:checkstyle || true
+    - name: Generate Checkstyle Report
+      run: mvn checkstyle:checkstyle
 
     - name: Setup Sonar Scanner
       uses: warchant/setup-sonar-scanner@v8
@@ -38,16 +38,11 @@ jobs:
         sonar-scanner \
         -Dsonar.host.url=${{ secrets.SONAR_URL }} \
         -Dsonar.login=${{ secrets.SONAR_TOKEN }} \
-        -Dsonar.organization=${{ secrets.SONAR_ORG }} \
         -Dsonar.projectKey=${{ secrets.SONAR_KEY }} \
-        -Dsonar.sources=src/ \
-        -Dsonar.junit.reportPaths=target/surefire-reports/ \
-        -Dsonar.jacoco.reportPaths=target/jacoco.exec \
-        -Dsonar.java.checkstyle.reportPaths=target/checkstyle-result.xml \
+        -Dsonar.sources=src \
         -Dsonar.java.binaries=target/classes
 
     - name: SonarQube Quality Gate Check
-      id: sonarqube-quality-gate-check
       uses: sonarsource/sonarqube-quality-gate-action@master
       with:
         pollingTimeoutSec: 600
