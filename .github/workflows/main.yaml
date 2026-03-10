@@ -1,51 +1,54 @@
 name: vprofile CI/CD
 
-on: workflow_dispatch
+on:
+  workflow_dispatch
+  push:
+    branches:
+      - main
 
 env:
   AWS_REGION: ap-south-1
   REGISTRY: subhankarpaul
-  EKS_CLUSTER: my-cluster
+  IMAGE_NAME: vprofile
 
 jobs:
-  testing:
+
+  build-test:
     runs-on: ubuntu-latest
 
     steps:
 
-    - name: Checkout code
+    - name: Checkout Code
       uses: actions/checkout@v4
 
-    - name: Setup Java 11
+    - name: Setup Java
       uses: actions/setup-java@v3
       with:
-        java-version: '11'
-        distribution: 'temurin'
+        distribution: temurin
+        java-version: 11
+        cache: maven
 
-    - name: Maven Test
-      run: mvn clean test -Dcheckstyle.skip=true
+    - name: Maven Build
+      run: mvn clean install -Dcheckstyle.skip=true
 
     - name: Generate Checkstyle Report
       run: mvn checkstyle:checkstyle
 
-    - name: Setup Sonar Scanner
-      uses: warchant/setup-sonar-scanner@v8
+    - name: Upload Checkstyle Report
+      uses: actions/upload-artifact@v4
       with:
-        version: 7.2.0.5079
+        name: checkstyle-report
+        path: target/checkstyle-result.xml
 
     - name: SonarQube Scan
-      run: |
-        sonar-scanner \
-        -Dsonar.host.url=${{ secrets.SONAR_URL }} \
-        -Dsonar.login=${{ secrets.SONAR_TOKEN }} \
-        -Dsonar.projectKey=${{ secrets.SONAR_KEY }} \
-        -Dsonar.sources=src \
-        -Dsonar.java.binaries=target/classes
+      uses: SonarSource/sonarqube-scan-action@v2
+      env:
+        SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+        SONAR_HOST_URL: ${{ secrets.SONAR_URL }}
 
-    - name: SonarQube Quality Gate Check
-      uses: sonarsource/sonarqube-quality-gate-action@master
-      with:
-        pollingTimeoutSec: 600
+    - name: SonarQube Quality Gate
+      uses: SonarSource/sonarqube-quality-gate-action@v1
+      timeout-minutes: 10
       env:
         SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
         SONAR_HOST_URL: ${{ secrets.SONAR_URL }}
