@@ -26,7 +26,7 @@ jobs:
       run: mvn test
 
     - name: Checkstyle
-      run: mvn checkstyle:check || true
+      run: mvn checkstyle:checkstyle || true
 
     - name: Setup Sonar Scanner
       uses: warchant/setup-sonar-scanner@v8
