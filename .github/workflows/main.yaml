@@ -41,11 +41,11 @@ jobs:
         path: target/checkstyle-result.xml
 
     - name: SonarCloud Scan
-      run: mvn sonar:sonar \
-          -Dsonar.projectKey=vprofile-action-2026 \
-          -Dsonar.organization=vprofile-action-2026 \
-          -Dsonar.host.url=https://sonarcloud.io \
-          -Dsonar.login=${{ secrets.SONAR_TOKEN }}
+      run: mvn -B verify sonar:sonar \
+        -Dsonar.projectKey=vprofile-action-2026 \
+        -Dsonar.organization=vprofile-action-2026 \
+        -Dsonar.host.url=https://sonarcloud.io \
+        -Dsonar.token=${{ secrets.SONAR_TOKEN }}
 
     - name: SonarQube Quality Gate
       uses: SonarSource/sonarqube-quality-gate-action@v1
