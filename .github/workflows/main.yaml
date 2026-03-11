@@ -40,13 +40,11 @@ jobs:
         name: checkstyle-report
         path: target/checkstyle-result.xml
 
-    - name: SonarQube Scan
-      uses: SonarSource/sonarqube-scan-action@v2
-      with:
-        args: >
-          -Dsonar.projectKey=vprofile-action-2026
-          -Dsonar.organization=vprofile-action-2026
-          -Dsonar.host.url=${{ secrets.SONAR_URL }}
+    - name: SonarCloud Scan
+      run: mvn sonar:sonar \
+          -Dsonar.projectKey=vprofile-action-2026 \
+          -Dsonar.organization=vprofile-action-2026 \
+          -Dsonar.host.url=https://sonarcloud.io \
           -Dsonar.login=${{ secrets.SONAR_TOKEN }}
 
     - name: SonarQube Quality Gate
