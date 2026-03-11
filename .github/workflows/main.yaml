@@ -49,23 +49,74 @@ jobs:
           -Dsonar.token=${{ secrets.SONAR_TOKEN }}
 
   docker:
+    needs: build-test
     runs-on: ubuntu-latest
+
     steps:
-      -
-        name: Login to Docker Hub
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Login to Docker Hub
         uses: docker/login-action@v3
         with:
           username: subhankarpaul
           password: ${{ secrets.DOCKERHUB_TOKEN }}
-      -
-        name: Set up QEMU
+
+      - name: Set up QEMU
         uses: docker/setup-qemu-action@v3
-      -
-        name: Set up Docker Buildx
+
+      - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
-      -
-        name: Build and push
-        uses: docker/build-push-action@v6
+
+      - name: Build Docker Image
+        run: docker build -t subhankarpaul/vprofileapp:${{ github.run_number }} .
+
+      - name: Trivy Security Scan
+        uses: aquasecurity/trivy-action@0.24.0
         with:
-          push: true
-          tags: subhankarpaul/vprofileapp:${{ github.run_number }}
+          image-ref: subhankarpaul/vprofileapp:${{ github.run_number }}
+          format: table
+          exit-code: 1
+          ignore-unfixed: true
+          vuln-type: 'os,library'
+          severity: 'CRITICAL,HIGH'
+
+      - name: Push Docker Image
+        run: docker push subhankarpaul/vprofileapp:${{ github.run_number }}
+
+
+  DeployToEks:
+    needs: docker
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v2
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ap-south-1
+
+      - name: get kubeconfig file
+        run: |
+          aws eks update-kubeconfig --name my-cluster --region ap-south-1
+
+      - name: Print config file
+        run: cat ~/.kube/config
+
+      - name: Deploy Helm
+      uses: bitovi/github-actions-deploy-eks-helm@v1.2.12
+      with:
+        aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        aws-region: ap-south-1
+        cluster-name: my-cluster
+        # config-files: .github/values/dev.yaml
+        chart-path: helm/vprochart
+        namespace: dev
+        values: appimage=subhankarpaul/vprofileapp,apptag=${{ github.run_number }}
+        name: vprofile-stack
+
+        
