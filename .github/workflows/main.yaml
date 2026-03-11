@@ -42,9 +42,12 @@ jobs:
 
     - name: SonarQube Scan
       uses: SonarSource/sonarqube-scan-action@v2
-      env:
-        SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-        SONAR_HOST_URL: ${{ secrets.SONAR_URL }}
+      with:
+        args: >
+          -Dsonar.projectKey=vprofile-action-2026
+          -Dsonar.organization=vprofile-action-2026
+          -Dsonar.host.url=${{ secrets.SONAR_URL }}
+          -Dsonar.login=${{ secrets.SONAR_TOKEN }}
 
     - name: SonarQube Quality Gate
       uses: SonarSource/sonarqube-quality-gate-action@v1
