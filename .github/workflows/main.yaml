@@ -107,16 +107,16 @@ jobs:
         run: cat ~/.kube/config
 
       - name: Deploy Helm
-      uses: bitovi/github-actions-deploy-eks-helm@v1.2.12
-      with:
-        aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-        aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-        aws-region: ap-south-1
-        cluster-name: my-cluster
-        # config-files: .github/values/dev.yaml
-        chart-path: helm/vprochart
-        namespace: dev
-        values: appimage=subhankarpaul/vprofileapp,apptag=${{ github.run_number }}
-        name: vprofile-stack
+        uses: bitovi/github-actions-deploy-eks-helm@v1.2.12
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ap-south-1
+          cluster-name: my-cluster
+          # config-files: .github/values/dev.yaml
+          chart-path: helm/vprochart
+          namespace: dev
+          values: appimage=subhankarpaul/vprofileapp,apptag=${{ github.run_number }}
+          name: vprofile-stack
 
         
