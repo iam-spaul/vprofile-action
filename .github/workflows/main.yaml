@@ -40,10 +40,10 @@ jobs:
         name: checkstyle-report
         path: target/checkstyle-result.xml
 
-    - name: Build + SonarCloud Scan
+    - name: SonarCloud Scan
       run: |
         mvn -B clean verify sonar:sonar \
-          -Dsonar.projectKey=vprofile-action-2026 \
+          -Dsonar.projectKey=iam-spaul_vprofile-action \
           -Dsonar.organization=vprofile-action-2026 \
           -Dsonar.host.url=https://sonarcloud.io \
           -Dsonar.token=${{ secrets.SONAR_TOKEN }}
